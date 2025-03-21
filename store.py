@@ -2,7 +2,23 @@ import products
 
 
 class Store:
+    """
+    Represents a store containing a list of products.
+
+    Attributes:
+        products (list[products.Product]): A list of products available in the store.
+    """
+
     def __init__(self, products_list: list[products.Product]):
+        """
+        Initializes the Store with a list of products.
+
+        Args:
+            products_list (list[products.Product]): A list of Product instances.
+
+        Raises:
+            TypeError: If products_list is not a list or contains non-Product elements.
+        """
         # Check if products_list is a list
         if not isinstance(products_list, list):
             raise TypeError("products_list must be a list of Product objects.")

@@ -11,6 +11,13 @@ product_list = [products.Product("MacBook Air M2", price=1450, quantity=100),
 
 
 def main():
+    """
+    Main function to run the store application.
+
+    Initializes the store and provides a menu for user interaction.
+    The user can view products, check total quantity, process orders,
+    or exit the application.
+    """
     best_buy = store.Store(product_list)
     while True:
         display_menu()

@@ -2,7 +2,29 @@ CURRENCY = "€"
 
 
 class Product:
+    """
+    Represents a product with a name, price, and quantity.
+
+    Attributes:
+        name (str): The name of the product.
+        price (float): The price of the product.
+        quantity (int): The available quantity of the product.
+        active (bool): Indicates whether the product is active.
+    """
+
     def __init__(self, name: str, price: float, quantity: int):
+        """
+        Initializes a Product instance with validation.
+
+        Args:
+            name (str): The name of the product.
+            price (float): The price of the product.
+            quantity (int): The initial quantity of the product.
+
+        Raises:
+            TypeError: If name is not a string, price is not a number, or quantity is not an integer.
+            ValueError: If name is empty, price is negative, or quantity is negative.
+        """
         # Name validation
         if not isinstance(name, str):
             raise TypeError("Product name must be a string.")
@@ -113,5 +135,4 @@ class Product:
             updated_quantity = self.quantity - quantity
             self.set_quantity(updated_quantity)
             return round(float(quantity * self.price), 2)
-        else:
-            raise ValueError("Not enough products in stock.")
+        raise ValueError("Not enough products in stock.")
