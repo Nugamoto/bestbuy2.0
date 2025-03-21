@@ -1,3 +1,6 @@
+from products import CURRENCY
+
+
 def enter_to_continue():
     """
     Prompts the user to press 'Enter' to continue.
@@ -85,7 +88,7 @@ def order_process(store_obj):
         if not user_input:
             if order_list:
                 total_order = store_obj.order(order_list)
-                print(f"\n*** Order made. Total payment: {total_order} ***")
+                print(f"\n*** Order made. Total payment: {total_order}{CURRENCY} ***")
                 break
             print("\nOrder was empty.")
             break
@@ -101,4 +104,4 @@ def order_process(store_obj):
         if quantity:
             order_list.append((current_product, quantity))
             current_quantities[current_product_idx] -= quantity
-            print(f"\n{current_product.name} successfully added to cart. ({quantity} pcs)\n")
+            print(f"\n'{current_product.name}' successfully added to cart. ({quantity} pcs)\n")
