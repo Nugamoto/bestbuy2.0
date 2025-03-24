@@ -22,10 +22,12 @@ def get_valid_number_from_user(start_num: int, end_num: int) -> int:
     while True:
         user_input = input(f"Please choose a number({start_num}-{end_num}): ")
         if not user_input:
-            return 0
+            return None
         if not user_input.isdigit():
+            print("You haven't entered a number!")
             continue
         if not start_num <= int(user_input) <= end_num:
+            print(f"Number must between '{start_num}' and '{end_num}'!")
             continue
         return int(user_input)
 
