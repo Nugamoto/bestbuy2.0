@@ -128,8 +128,8 @@ class Product:
         # Quantity validation
         if not isinstance(quantity, int):
             raise TypeError("Quantity must be an integer.")
-        if quantity < 0:
-            raise ValueError("Quantity cannot be negative.")
+        if quantity <= 0:
+            raise ValueError("Quantity cannot be negative or 0.")
 
         if self.quantity >= quantity:
             updated_quantity = self.quantity - quantity
