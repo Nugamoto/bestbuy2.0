@@ -1,4 +1,6 @@
-from products import CURRENCY
+import products
+
+MAX_ORDER_AMOUNT = 10000
 
 
 def enter_to_continue():
@@ -82,7 +84,7 @@ def order_process(store_obj):
     order_list = []
     products_list = store_obj.get_all_products()
     display_products(store_obj)
-    current_quantities = [product.get_quantity() for product in products_list]
+    current_quantities = [product.quantity for product in products_list]
     while True:
         print(f"When you want to finish order, enter empty text.\n"
               f"Which product do you want?")
@@ -90,20 +92,26 @@ def order_process(store_obj):
         if not user_input:
             if order_list:
                 total_order = store_obj.order(order_list)
-                print(f"\n*** Order made. Total payment: {total_order}{CURRENCY} ***")
+                print(f"\n*** Order made. Total payment: {total_order}{products.CURRENCY} ***")
                 break
             print("\nOrder was empty.")
             break
 
         current_product_idx = user_input - 1
-        if current_quantities[current_product_idx] < 1:
+        current_product = products_list[current_product_idx]
+
+        if current_quantities[current_product_idx] < 1 and not isinstance(current_product, products.NonStockedProduct):
             print("\nYou have all items in you cart.\n"
                   "Checkout or add another product.\n")
             continue
-        current_product = products_list[current_product_idx]
         print(f"What amount do you want?")
-        quantity = get_valid_number_from_user(1, current_quantities[current_product_idx])
+        if not isinstance(current_product, products.NonStockedProduct):
+            quantity = get_valid_number_from_user(1, current_quantities[current_product_idx])
+        else:
+            quantity = get_valid_number_from_user(1, MAX_ORDER_AMOUNT)
+
         if quantity:
             order_list.append((current_product, quantity))
-            current_quantities[current_product_idx] -= quantity
+            if not isinstance(current_product, products.NonStockedProduct):
+                current_quantities[current_product_idx] -= quantity
             print(f"\n'{current_product.name}' successfully added to cart. ({quantity} pcs)\n")
