@@ -3,7 +3,18 @@ from abc import ABC, abstractmethod
 import products
 
 
-class Promotion(ABC):  # ABC steht für Abstract Base Class
+class Promotion(ABC):
+    """
+    Abstract base class for promotions.
+
+    Attributes:
+        name (str): The name of the promotion.
+
+    Methods:
+        apply_promotion(product, quantity) -> float:
+            Abstract method to apply the promotion to a product purchase.
+    """
+
     def __init__(self, name):
         # Name validation
         if not isinstance(name, str):
@@ -15,11 +26,39 @@ class Promotion(ABC):  # ABC steht für Abstract Base Class
 
     @abstractmethod
     def apply_promotion(self, product, quantity) -> float:
+        """
+        Apply the promotion to the given product and quantity.
+
+        Parameters:
+            product (products.Product): The product instance to which the promotion applies.
+            quantity (int): The quantity of the product being purchased.
+
+        Returns:
+            float: The total price after applying the promotion.
+        """
         pass
 
 
 class PercentDiscount(Promotion):
+    """
+    Promotion that applies a percentage discount to the total price.
+
+    Attributes:
+        percent (float): The discount percentage (greater than 0 and less than 100).
+    """
+
     def __init__(self, name, percent):
+        """
+        Initialize a PercentDiscount promotion.
+
+        Parameters:
+            name (str): The name of the promotion.
+            percent (int or float): The discount percentage.
+
+        Raises:
+            TypeError: If the name is not a string or percent is not a number.
+            ValueError: If the name is empty or percent is not between 0 and 100.
+        """
         super().__init__(name)
         # percent validation
         if not isinstance(percent, (int, float)):
@@ -30,6 +69,20 @@ class PercentDiscount(Promotion):
         self.percent = percent
 
     def apply_promotion(self, product, quantity) -> float:
+        """
+        Calculate the price after applying the percentage discount.
+
+        Parameters:
+            product (products.Product): The product instance.
+            quantity (int): The number of products purchased.
+
+        Returns:
+            float: The discounted total price.
+
+        Raises:
+            TypeError: If product is not an instance of products.Product or quantity is not an integer.
+            ValueError: If quantity is negative.
+        """
         # product validation
         if not isinstance(product, products.Product):
             raise TypeError(f"{product} is not from the Product class.")
@@ -46,10 +99,41 @@ class PercentDiscount(Promotion):
 
 
 class SecondHalfPrice(Promotion):
+    """
+    Promotion that applies a second item at half price.
+
+    This promotion calculates the total price such that for every pair of items,
+    the second item is sold at half its normal price.
+    """
+
     def __init__(self, name):
+        """
+        Initialize a SecondHalfPrice promotion.
+
+        Parameters:
+            name (str): The name of the promotion.
+
+        Raises:
+            TypeError: If the name is not a string.
+            ValueError: If the name is empty.
+        """
         super().__init__(name)
 
     def apply_promotion(self, product, quantity) -> float:
+        """
+        Calculate the total price with every second product at half price.
+
+        Parameters:
+            product (products.Product): The product instance.
+            quantity (int): The number of products purchased.
+
+        Returns:
+            float: The total price after applying the promotion.
+
+        Raises:
+            TypeError: If product is not an instance of products.Product or quantity is not an integer.
+            ValueError: If quantity is negative.
+        """
         # product validation
         if not isinstance(product, products.Product):
             raise TypeError(f"{product} is not from the Product class.")
@@ -66,10 +150,42 @@ class SecondHalfPrice(Promotion):
 
 
 class ThirdOneFree(Promotion):
+    """
+    Promotion that implements a "buy 2, get 1 free" offer.
+
+    For every three products purchased, the customer pays for two.
+    """
+
     def __init__(self, name):
+        """
+        Initialize a ThirdOneFree promotion.
+
+        Parameters:
+            name (str): The name of the promotion.
+
+        Raises:
+            TypeError: If the name is not a string.
+            ValueError: If the name is empty.
+        """
         super().__init__(name)
 
     def apply_promotion(self, product, quantity) -> float:
+        """
+        Calculate the total price applying the "buy 2, get 1 free" promotion.
+
+        For every three products, the customer pays for two.
+
+        Parameters:
+            product (products.Product): The product instance.
+            quantity (int): The number of products purchased.
+
+        Returns:
+            float: The total price after applying the promotion.
+
+        Raises:
+            TypeError: If product is not an instance of products.Product or quantity is not an integer.
+            ValueError: If quantity is negative.
+        """
         # product validation
         if not isinstance(product, products.Product):
             raise TypeError(f"{product} is not from the Product class.")
