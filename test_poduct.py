@@ -35,9 +35,9 @@ def test_product_becomes_inactive():
     product = Product("Test product", 99, 5)
     assert product.is_active() is True
 
-    product.set_quantity(0)
+    product.quantity = 0
 
-    assert product.get_quantity() == 0
+    assert product.quantity == 0
     assert product.is_active() is False
 
 
@@ -45,10 +45,10 @@ def test_buy_product():
     product = Product("Test product", 100, 5)
 
     assert product.buy(3) == 300.00
-    assert product.get_quantity() == 2
+    assert product.quantity == 2
 
     assert product.buy(2) == 200.00
-    assert product.get_quantity() == 0
+    assert product.quantity == 0
     assert product.is_active() is False
 
     with pytest.raises(ValueError, match="Quantity cannot be negative or 0."):
@@ -56,7 +56,6 @@ def test_buy_product():
 
     with pytest.raises(ValueError, match="Quantity cannot be negative or 0."):
         product.buy(-5)
-
 
 
 def test_buy_product_too_large_quantity():
