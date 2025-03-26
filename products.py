@@ -1,3 +1,5 @@
+import promotions
+
 CURRENCY = "€"
 
 
@@ -10,6 +12,7 @@ class Product:
         price (float): The price of the product.
         quantity (int): The available quantity of the product.
         active (bool): Indicates whether the product is active.
+        promotion (promotions.Promotion or None): The promotion applied to the product.
     """
 
     def __init__(self, name: str, price: float, quantity: int):
@@ -46,39 +49,51 @@ class Product:
         # Instance Variables
         self.name = name
         self.price = float(price)
-        self.quantity = quantity
+        self._quantity = quantity
         self.active = True
+        self._promotion = None
 
-    # Methods
-    def get_quantity(self) -> int:
-        """
-        Retrieves the current quantity of the product.
+    @property
+    def promotion(self):
+        """Returns the current promotion applied to the product, if any."""
+        return self._promotion
 
-        Returns:
-            int: The current quantity of the product.
-        """
-        return self.quantity
-
-    def set_quantity(self, quantity: int):
-        """
-        Sets the quantity of the product.
+    @promotion.setter
+    def promotion(self, value):
+        """Sets the promotion for the product.
 
         Args:
-            quantity (int): The new quantity to set.
+            value (promotions.Promotion or None): The promotion to apply, or None.
 
         Raises:
-            TypeError: If quantity is not an integer.
-            ValueError: If quantity is negative.
+            TypeError: If value is not an instance of promotions.Promotion or None.
         """
-        # Quantity validation
-        if not isinstance(quantity, int):
+        if value is not None and not isinstance(value, promotions.Promotion):
+            raise TypeError("Promotion must be an instance of promotions.Promotion or None.")
+        self._promotion = value
+
+    @property
+    def quantity(self):
+        """Gets the current quantity of the product."""
+        return self._quantity
+
+    @quantity.setter
+    def quantity(self, value):
+        """Sets the quantity of the product. If quantity is set to 0, the product is deactivated.
+
+        Args:
+            value (int): The new quantity to set.
+
+        Raises:
+            TypeError: If value is not an integer.
+            ValueError: If value is negative.
+        """
+        if not isinstance(value, int):
             raise TypeError("Quantity must be an integer.")
-        if quantity < 0:
+        if value < 0:
             raise ValueError("Quantity cannot be negative.")
-
-        self.quantity = quantity
-
-        if self.quantity == 0:
+        self._quantity = value
+        if self._quantity == 0:
             self.deactivate()
 
     def is_active(self) -> bool:
@@ -107,10 +122,11 @@ class Product:
         Displays product details in a formatted string.
 
         Returns:
-            str: A formatted string showing product name, price, and quantity.
+            str: A formatted string showing product name, price, quantity and Promotion.
         """
+        promotion_str = f" | Promotion: {self.promotion.name}" if self.promotion is not None else ""
         return (f"{self.name} | Price: {self.price}{CURRENCY} | "
-                f"Quantity: {self.quantity}")
+                f"Quantity: {self.quantity}{promotion_str}")
 
     def buy(self, quantity) -> float:
         """
@@ -134,8 +150,12 @@ class Product:
 
         if self.quantity >= quantity:
             updated_quantity = self.quantity - quantity
-            self.set_quantity(updated_quantity)
-            return round(float(quantity * self.price), 2)
+            self.quantity = updated_quantity
+            if self.promotion is not None:
+                total_price = self.promotion.apply_promotion(self, quantity)
+            else:
+                total_price = float(quantity * self.price)
+            return round(total_price, 2)
         raise ValueError("Not enough products in stock.")
 
 
@@ -162,10 +182,12 @@ class NonStockedProduct(Product):
         Return a string representation of the product.
 
         Returns:
-            str: A formatted string showing product name and price.
+            str: A formatted string showing product name, price and Promotion.
         """
+        promotion_str = f" | Promotion: {self.promotion.name}" if self.promotion is not None else ""
         return (f"{self.name} | Price: {self.price}{CURRENCY} | "
-                f"Quantity: Unlimited")
+                f"Quantity: Unlimited"
+                f"{promotion_str}")
 
     def buy(self, quantity: int) -> float:
         """
@@ -187,21 +209,61 @@ class NonStockedProduct(Product):
         if quantity <= 0:
             raise ValueError("Quantity cannot be negative or 0.")
 
-        return round(float(quantity * self.price), 2)
+        if self.promotion is not None:
+            total_price = self.promotion.apply_promotion(self, quantity)
+        else:
+            total_price = quantity * self.price
+
+        return round(float(total_price), 2)
 
 
 class LimitedProduct(Product):
+    """
+    Class representing a product with a purchase limit.
+
+    This class extends the Product class by adding a maximum purchase limit
+    per transaction.
+    """
 
     def __init__(self, name: str, price: float, quantity: int, maximum: int):
+        """
+        Initialize a new LimitedProduct instance.
+
+        Parameters:
+            name (str): The name of the product.
+            price (float): The price of the product.
+            quantity (int): The available quantity in stock.
+            maximum (int): The maximum number of items that can be purchased in one transaction.
+
+        Raises:
+            TypeError: If maximum is not an integer.
+            ValueError: If maximum is not positive.
+        """
         super().__init__(name, price, quantity)
         self.maximum = maximum
 
     @property
     def maximum(self) -> int:
+        """
+        Get the maximum allowed quantity per purchase.
+
+        Returns:
+            int: The maximum number of items that can be purchased.
+        """
         return self._maximum
 
     @maximum.setter
     def maximum(self, value: int):
+        """
+        Set the maximum allowed quantity per purchase.
+
+        Parameters:
+            value (int): The new maximum value.
+
+        Raises:
+            TypeError: If value is not an integer.
+            ValueError: If value is less than or equal to 0.
+        """
         if not isinstance(value, int):
             raise TypeError("Maximum must be an integer.")
         if value <= 0:
@@ -209,12 +271,42 @@ class LimitedProduct(Product):
         self._maximum = value
 
     def show(self) -> str:
+        """
+        Return a string representation of the product.
+
+        The string includes the product's name, price, available quantity,
+        and maximum allowed purchase quantity.
+
+        Returns:
+            str: A formatted string with the product details.
+        """
+        promotion_str = f" | Promotion: {self.promotion.name}" if self.promotion is not None else ""
         return (f"{self.name} | "
                 f"Price: {self.price}{CURRENCY} | "
                 f"Quantity: {self.quantity} | "
-                f"Maximum: {self.maximum}")
+                f"Maximum: {self.maximum}"
+                f"{promotion_str}")
 
-    def buy(self, quantity) -> float:
+    def buy(self, quantity: int) -> float:
+        """
+        Attempt to purchase a specified quantity of the product.
+
+        Validates that the quantity is an integer, positive, does not exceed the
+        maximum allowed per transaction, and that there is enough stock available.
+        If valid, updates the stock and returns the total price for the purchase.
+
+        Parameters:
+            quantity (int): The number of items to purchase.
+
+        Returns:
+            float: The total price for the purchased items, rounded to 2 decimal places.
+
+        Raises:
+            TypeError: If quantity is not an integer.
+            ValueError: If quantity is less than or equal to 0.
+            ValueError: If quantity exceeds the maximum allowed per transaction.
+            ValueError: If there is insufficient stock available.
+        """
         # Quantity validation
         if not isinstance(quantity, int):
             raise TypeError("Quantity must be an integer.")
@@ -228,6 +320,12 @@ class LimitedProduct(Product):
 
         if self.quantity >= quantity:
             updated_quantity = self.quantity - quantity
-            self.set_quantity(updated_quantity)
-            return round(float(quantity * self.price), 2)
+            self.quantity = updated_quantity
+            if self.promotion is not None:
+                total_price = self.promotion.apply_promotion(self, quantity)
+            else:
+                total_price = quantity * self.price
+
+            return round(float(total_price), 2)
+
         raise ValueError("Not enough products in stock.")
