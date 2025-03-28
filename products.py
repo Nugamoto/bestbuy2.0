@@ -16,8 +16,7 @@ class Product:
     """
 
     def __init__(self, name: str, price: float, quantity: int):
-        """
-        Initializes a Product instance with validation.
+        """Initialize a Product instance with validation via property setters.
 
         Args:
             name (str): The name of the product.
@@ -25,33 +24,89 @@ class Product:
             quantity (int): The initial quantity of the product.
 
         Raises:
-            TypeError: If name is not a string, price is not a number, or quantity is not an integer.
-            ValueError: If name is empty, price is negative, or quantity is negative.
+            TypeError: If the provided values are of incorrect types.
+            ValueError: If the provided values do not meet validation criteria.
         """
-        # Name validation
-        if not isinstance(name, str):
-            raise TypeError("Product name must be a string.")
-        if not name.strip():
-            raise ValueError("Product name cannot be empty or just spaces.")
-
-        # Price validation
-        if not isinstance(price, (int, float)):
-            raise TypeError("Price must be a number (int or float).")
-        if price < 0:
-            raise ValueError("Price cannot be negative.")
-
-        # Quantity validation
-        if not isinstance(quantity, int):
-            raise TypeError("Quantity must be an integer.")
-        if quantity < 0:
-            raise ValueError("Quantity cannot be negative.")
-
-        # Instance Variables
         self.name = name
-        self.price = float(price)
-        self._quantity = quantity
+        self.price = price
+        self.quantity = quantity
         self.active = True
-        self._promotion = None
+        self.promotion = None
+
+    @property
+    def name(self):
+        """Get the name of the product.
+
+        Returns:
+            str: The name of the product.
+        """
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        """Set the name of the product ensuring it is a non-empty string.
+
+        Args:
+            value (str): The new name for the product.
+
+        Raises:
+            TypeError: If the provided value is not a string.
+            ValueError: If the provided value is empty or only whitespace.
+        """
+        if not isinstance(value, str):
+            raise TypeError("Product name must be a string.")
+        if not value.strip():
+            raise ValueError("Product name cannot be empty or just spaces.")
+        self._name = value
+
+    @property
+    def price(self):
+        """Get the price of the product.
+
+        Returns:
+            float: The price of the product.
+        """
+        return self._price
+
+    @price.setter
+    def price(self, value):
+        """Set the price of the product ensuring it is a non-negative number.
+
+        Args:
+            value (int or float): The new price for the product.
+
+        Raises:
+            TypeError: If the provided value is not an int or float.
+            ValueError: If the provided value is negative.
+        """
+        if not isinstance(value, (int, float)):
+            raise TypeError("Price must be a number (int or float).")
+        if value < 0:
+            raise ValueError("Price cannot be negative.")
+        self._price = float(value)
+
+    @property
+    def active(self):
+        """Get the active status of the product.
+
+        Returns:
+            bool: True if the product is active, False otherwise.
+        """
+        return self._active
+
+    @active.setter
+    def active(self, value):
+        """Set the active status of the product ensuring it is a boolean.
+
+        Args:
+            value (bool): The new active status.
+
+        Raises:
+            TypeError: If the provided value is not a boolean.
+        """
+        if not isinstance(value, bool):
+            raise TypeError("Active must be a boolean.")
+        self._active = value
 
     @property
     def promotion(self):
