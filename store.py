@@ -28,16 +28,31 @@ class Store:
 
         self.products = products_list
 
+    def __contains__(self, item):
+        return item in self.products
+
+    def __add__(self, other):
+        # store validation
+        if not isinstance(other, Store):
+            raise TypeError("Can only add another Store.")
+
+        new_store = Store(self.products.copy())
+
+        for product in other.products:
+            new_store.add_product(product)
+
+        return new_store
+
     def add_product(self, product):
         """
         Adds a new product to the store.
+        If product already exists, update the quantity
 
         Args:
             product (products.Product): The product to be added.
 
         Raises:
             TypeError: If the provided product is not an instance of the Product class.
-            ValueError: If the product is already in the store.
 
         Returns:
             str: A confirmation message indicating successful addition.
@@ -45,8 +60,11 @@ class Store:
         # Product validation
         if not isinstance(product, products.Product):
             raise TypeError("product must be instance of the Product class.")
+
         if product in self.products:
-            raise ValueError("Product is already in the store.")
+            product_index = self.products.index(product)
+            self.products[product_index].quantity += product.quantity
+            return f"Product '{product.name}' is already in the store. Quantity was updated."
 
         self.products.append(product)
         return f"Product '{product.name}' added successfully."

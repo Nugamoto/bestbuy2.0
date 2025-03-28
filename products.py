@@ -117,17 +117,6 @@ class Product:
         """
         self.active = False
 
-    def __str__(self):
-        """
-        Displays product details in a formatted string.
-
-        Returns:
-            str: A formatted string showing product name, price, quantity and Promotion.
-        """
-        promotion_str = f" | Promotion: {self.promotion.name}" if self.promotion is not None else ""
-        return (f"{self.name} | Price: {self.price}{CURRENCY} | "
-                f"Quantity: {self.quantity}{promotion_str}")
-
     def buy(self, quantity) -> float:
         """
         Processes the purchase of a specified quantity of the product.
@@ -157,6 +146,55 @@ class Product:
                 total_price = float(quantity * self.price)
             return round(total_price, 2)
         raise ValueError("Not enough products in stock.")
+
+    def __str__(self):
+        """
+        Displays product details in a formatted string.
+
+        Returns:
+            str: A formatted string showing product name, price, quantity and Promotion.
+        """
+        promotion_str = f" | Promotion: {self.promotion.name}" if self.promotion is not None else ""
+        return (f"{self.name} | Price: {self.price}{CURRENCY} | "
+                f"Quantity: {self.quantity}{promotion_str}")
+
+    def __gt__(self, other):
+        """
+        Compare if this product's price is greater than another product's price.
+
+        Args:
+            other (Product): The product to compare against.
+
+        Returns:
+            bool: True if this product's price is greater, False otherwise.
+        """
+        return self.price > other.price
+
+    def __lt__(self, other):
+        """
+        Compare if this product's price is less than another product's price.
+
+        Args:
+            other (Product): The product to compare against.
+
+        Returns:
+            bool: True if this product's price is less, False otherwise.
+        """
+        return self.price < other.price
+
+    def __eq__(self, other):
+        """
+        Check if two products are equal based on their name.
+
+        Args:
+            other (Any): The object to compare against.
+
+        Returns:
+            bool: True if the other object is a Product and has the same name, False otherwise.
+        """
+        if not isinstance(other, Product):
+            return False
+        return self.name == other.name
 
 
 class NonStockedProduct(Product):
@@ -188,6 +226,16 @@ class NonStockedProduct(Product):
         return (f"{self.name} | Price: {self.price}{CURRENCY} | "
                 f"Quantity: Unlimited"
                 f"{promotion_str}")
+
+    def is_active(self) -> bool:
+        """
+        Indicates that NonStockedProduct instances are always considered active.
+
+        Returns:
+            bool: Always returns True, since non-stocked products do not depend
+                  on quantity for their availability.
+        """
+        return True
 
     def buy(self, quantity: int) -> float:
         """
