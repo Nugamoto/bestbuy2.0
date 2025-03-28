@@ -117,7 +117,7 @@ class Product:
         """
         self.active = False
 
-    def show(self) -> str:
+    def __str__(self):
         """
         Displays product details in a formatted string.
 
@@ -177,7 +177,7 @@ class NonStockedProduct(Product):
         """
         super().__init__(name, price, 0)
 
-    def show(self) -> str:
+    def __str__(self):
         """
         Return a string representation of the product.
 
@@ -270,7 +270,7 @@ class LimitedProduct(Product):
             raise ValueError("Maximum must be positive.")
         self._maximum = value
 
-    def show(self) -> str:
+    def __str__(self):
         """
         Return a string representation of the product.
 

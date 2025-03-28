@@ -60,7 +60,7 @@ def display_products(store_obj):
         print(f"\nAll Products:\n"
               f"------------")
         for num, product in enumerate(products_list, 1):
-            print(f"{num}. {product.show()}")
+            print(f"{num}. {product}")
         print(f"------------")
 
 
