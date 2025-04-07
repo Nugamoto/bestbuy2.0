@@ -74,6 +74,24 @@ def display_total_quantity(store_obj):
     print(f"\nTotal of '{store_obj.get_total_quantity()}' items in store.")
 
 
+def display_current_cart(order_list):
+    """
+    Displays the current contents of the user's cart.
+
+    Args:
+        order_list (list): A list of tuples (Product, quantity).
+    """
+    if not order_list:
+        print("\nYour cart is currently empty.")
+        return
+
+    print("\nCurrent Cart:")
+    print("----------------------------")
+    for i, (product, quantity) in enumerate(order_list, 1):
+        print(f"{i}. {product.name} - {quantity} pcs")
+    print("----------------------------")
+
+
 def order_process(store_obj):
     """
     Handles the order process, allowing users to select and purchase products.
@@ -85,13 +103,15 @@ def order_process(store_obj):
     products_list = store_obj.get_all_products()
     display_products(store_obj)
     current_quantities = [product.quantity for product in products_list]
+
     while True:
-        print(f"When you want to finish order, enter empty text.\n"
-              f"Which product do you want?")
+        print(f"\nWhen you want to finish order, enter empty text.\n"
+              f"Which product do you want?\n")
         user_input = get_valid_number_from_user(1, len(products_list))
         if not user_input:
             if order_list:
                 total_order = store_obj.order(order_list)
+                display_current_cart(order_list)
                 print(f"\n*** Order made. Total payment: {total_order}{products.CURRENCY} ***")
                 break
             print("\nOrder was empty.")
@@ -101,17 +121,57 @@ def order_process(store_obj):
         current_product = products_list[current_product_idx]
 
         if current_quantities[current_product_idx] < 1 and not isinstance(current_product, products.NonStockedProduct):
-            print("\nYou have all items in you cart.\n"
+            print("\nYou have all items in your cart.\n"
                   "Checkout or add another product.\n")
+            display_current_cart(order_list)
             continue
-        print(f"What amount do you want?")
-        if not isinstance(current_product, products.NonStockedProduct):
-            quantity = get_valid_number_from_user(1, current_quantities[current_product_idx])
-        else:
-            quantity = get_valid_number_from_user(1, MAX_ORDER_AMOUNT)
 
-        if quantity:
-            order_list.append((current_product, quantity))
+        print(f"What amount do you want?")
+        if isinstance(current_product, products.NonStockedProduct):
+            new_quantity = get_valid_number_from_user(1, MAX_ORDER_AMOUNT)
+        elif isinstance(current_product, products.LimitedProduct):
+            new_quantity = get_valid_number_from_user(1, current_product.maximum)
+        else:
+            new_quantity = get_valid_number_from_user(1, current_quantities[current_product_idx])
+
+        if not new_quantity:
+            continue
+
+        existing_index = None
+        for i, (product, _) in enumerate(order_list):
+            if product == current_product:
+                existing_index = i
+                break
+
+        added_to_cart_message = f"\n'{current_product.name}' successfully added to cart. ({new_quantity} pcs)\n"
+
+        if existing_index is not None:
+            _, existing_quantity = order_list[existing_index]
+            if isinstance(current_product, products.NonStockedProduct):
+                order_list[existing_index] = (current_product, existing_quantity + new_quantity)
+                print(added_to_cart_message)
+                display_current_cart(order_list)
+
+            elif isinstance(current_product, products.LimitedProduct):
+                if existing_quantity + new_quantity > current_product.maximum:
+                    print(f"\nYou can only have {current_product.maximum} of '{current_product.name}' in your cart!")
+                    display_current_cart(order_list)
+                    continue
+                else:
+                    order_list[existing_index] = (current_product, existing_quantity + new_quantity)
+                    current_quantities[current_product_idx] -= new_quantity
+                    print(added_to_cart_message)
+                    display_current_cart(order_list)
+
+            else:
+                order_list[existing_index] = (current_product, existing_quantity + new_quantity)
+                current_quantities[current_product_idx] -= new_quantity
+                print(added_to_cart_message)
+                display_current_cart(order_list)
+
+        else:
+            order_list.append((current_product, new_quantity))
             if not isinstance(current_product, products.NonStockedProduct):
-                current_quantities[current_product_idx] -= quantity
-            print(f"\n'{current_product.name}' successfully added to cart. ({quantity} pcs)\n")
+                current_quantities[current_product_idx] -= new_quantity
+            print(added_to_cart_message)
+            display_current_cart(order_list)
